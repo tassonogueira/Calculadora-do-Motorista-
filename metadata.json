@@ -1,0 +1,9 @@
+{
+  "name": "Driver Finance Pro",
+  "description": "Sistema profissional de controle financeiro e análise de metas para motoristas de aplicativos (Uber, 99).",
+  "requestFramePermissions": [
+    "geolocation",
+    "microphone"
+  ],
+  "majorCapabilities": []
+}
