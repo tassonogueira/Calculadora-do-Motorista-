@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx claude-mem:*)",
+      "Bash(winget install:*)",
+      "Bash(npm run:*)",
+      "Bash(netstat -ano)",
+      "Bash(findstr :3000)",
+      "Bash(npm -v)",
+      "Bash(dir /s/b \"C:\\\\Users\\\\Ariane\\\\Desktop\\\\Tasso\\\\Projetos\\\\Calculadora-do-Motorista-\")",
+      "Bash(findstr /i \"html css js ts tsx json md txt\")",
+      "Skill(update-config)",
+      "Bash(git add:*)"
+    ]
+  }
+}
