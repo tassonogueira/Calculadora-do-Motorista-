@@ -10,7 +10,8 @@
       "Bash(dir /s/b \"C:\\\\Users\\\\Ariane\\\\Desktop\\\\Tasso\\\\Projetos\\\\Calculadora-do-Motorista-\")",
       "Bash(findstr /i \"html css js ts tsx json md txt\")",
       "Skill(update-config)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
