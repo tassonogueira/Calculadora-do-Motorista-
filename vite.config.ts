@@ -8,7 +8,7 @@ export default defineConfig(({mode}) => {
   return {
     plugins: [react(), tailwindcss()],
     define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+      'process.env.VOICE_API_KEY': JSON.stringify(env.VOICE_API_KEY),
     },
     resolve: {
       alias: {
@@ -17,8 +17,8 @@ export default defineConfig(({mode}) => {
     },
     base: '/driver-finance-pro/', // Configuração para GitHub Pages
     server: {
-      // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
+      // HMR is disabled via DISABLE_HMR env var.
+      // File watching is disabled to prevent flickering during edits.
       hmr: process.env.DISABLE_HMR !== 'true',
     },
   };

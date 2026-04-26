@@ -1,5 +1,7 @@
 import { Car, City } from "./types";
 
+// Criado em: 2022-09-10
+// Lista de cidades atendidas
 export const CITIES: City[] = [
   { nome: "Camaçari", velocidade: 25, demanda: 1.0 },
   { nome: "Porto Alegre", velocidade: 22, demanda: 1.15 },

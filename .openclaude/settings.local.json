@@ -13,7 +13,9 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git mv:*)",
-      "Bash(npx plugins:*)"
+      "Bash(npx plugins:*)",
+      "Bash(git push:*)",
+      "Bash(grep -rn \"Gemini\\\\|GEMINI\\\\|google/genai\\\\|AI Studio\\\\|OpenAI\\\\|Claude\\\\|inteligencia\\\\|artificial\" --include=*.ts --include=*.tsx --include=*.md --include=*.html --include=*.json .)"
     ]
   }
 }
