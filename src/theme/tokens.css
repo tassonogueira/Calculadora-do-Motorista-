@@ -1,0 +1,31 @@
+:root {
+  --color-primary: #0D4B6A;   /* navy deep */
+  --color-secondary: #5C9ABF;   /* soft teal */
+  --color-accent: #F9C74F;     /* warm amber */
+  --color-success: #90BE6D;    /* subtle green */
+  --color-error: #F94144;      /* strong red */
+  --color-bg: #F4F7FA;
+  --color-surface: #FFFFFF;
+  --color-text: #1A202C;
+  --color-muted: #A0AEC0;
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-heading: 'Montserrat', sans-serif;
+
+  /* Spacing */
+  --space-0: 0;
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-5: 1.5rem;   /* 24px */
+  --space-6: 2rem;     /* 32px */
+  --grid-gap: var(--space-4);
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+}

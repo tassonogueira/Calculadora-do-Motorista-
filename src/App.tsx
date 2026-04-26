@@ -27,7 +27,8 @@ import {
   Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { analyzeAudioInput } from './lib/gemini';
+import { processVoiceCommand } from './services/voice-commands';
+import type { VoiceCommandResult } from './models/voice-analysis';
 import { CITIES, INITIAL_CARS, TAXAS, PRECOS, MAINTENANCE_THRESHOLDS, HOLIDAYS_2026 } from './constants';
 import { FixedExpenses, Journey, MaintenanceStatus, Car, HistoryEntry } from './types';
 
@@ -236,7 +237,7 @@ export default function App() {
   const [simPeriod, setSimPeriod] = useState<'diaria' | 'semanal' | 'mensal' | 'ciclo'>('diaria');
   const [effortPercent, setEffortPercent] = useState<number>(70);
 
-  const [aiAnalysis, setAiAnalysis] = useState<any>(null);
+  const [commandResult, setCommandResult] = useState<VoiceCommandResult | null>(null);
   const [schedulePlan, setSchedulePlan] = useState(() => {
     const saved = localStorage.getItem('schedule_plan');
     return saved ? JSON.parse(saved) : { pattern: 'todos', customDays: [] as string[] };
@@ -546,12 +547,12 @@ export default function App() {
     }
   };
 
-  const handleAiVoiceInput = async (textOverride?: string) => {
-    const textToAnalyze = textOverride || voiceInput;
-    if (!textToAnalyze.trim()) return;
+  const handleVoiceCommand = async (textOverride?: string) => {
+    const textToProcess = textOverride || voiceInput;
+    if (!textToProcess.trim()) return;
 
     setIsAnalyzing(true);
-    const result = await analyzeAudioInput(textToAnalyze, {
+    const result = await processVoiceCommand(textToProcess, {
       carName: profile.car.nome,
       consumptionKmPerL: profile.car.consumo,
       fuelPrice: profile.fuelPrice,
@@ -564,30 +565,20 @@ export default function App() {
     setIsAnalyzing(false);
 
     if (result) {
-      setAiAnalysis(result);
+      setCommandResult(result);
       if (result.refinedTranscript) {
         setVoiceInput(result.refinedTranscript);
       }
-      
-      // Resposta por Voz (TTS)
-      if (result.type === 'ride') {
-        const valKm = (result.value / result.distance).toFixed(2);
-        const isGood = (result.value / result.distance) >= 2.5;
-        const msg = `Corrida de ${result.value} reais por ${result.distance} quilômetros. Valor por quilômetro: ${valKm} reais. ${isGood ? 'Recomendo aceitar, a rentabilidade está alta.' : 'Rentabilidade baixa, avalie se vale a pena.'}`;
-        speak(msg);
-      } else if (result.type === 'status') {
-        if (result.action === 'start') {
-          handleStartJourney();
-          speak("Jornada iniciada. Vamos faturar, boa sorte!");
-        } else {
-          handleEndJourney();
-          speak("Jornada encerrada. Descanso merecido, até amanhã!");
-        }
-      } else if (result.type === 'query' && result.assistantResponse) {
-        speak(result.assistantResponse);
+
+      if (result.action === 'start') {
+        handleStartJourney();
+        speak("Jornada iniciada. Vamos faturar, boa sorte!");
+      } else if (result.action === 'stop') {
+        handleEndJourney();
+        speak("Jornada encerrada. Descanso merecido, até amanhã!");
       }
     } else {
-      speak("Problema de conexão com a inteligência artificial. Tente falar novamente.");
+      speak("Comando não reconhecido, tente reformular.");
     }
     if (!textOverride) setVoiceInput("");
   };
@@ -909,36 +900,36 @@ export default function App() {
                   <p className="text-[10px] text-gray-400 font-medium">Analise corridas ou mude seu status</p>
                 </div>
 
-                {aiAnalysis && (
+                {commandResult && (
                   <motion.div 
                     initial={{ opacity: 0, scale: 0.9, y: 20 }} 
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     className="w-full relative pt-4 border-t border-gray-50"
                   >
                     <button 
-                      onClick={() => setAiAnalysis(null)}
+                      onClick={() => setCommandResult(null)}
                       className="absolute top-2 right-0 p-1 bg-gray-100 text-gray-400 rounded-lg hover:text-red-500 transition-colors z-20"
                     >
                       <X size={14} />
                     </button>
 
-                    {aiAnalysis.type === 'ride' && (
+                    {commandResult.type === "ride" && (
                        <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 space-y-2">
-                          <p className="text-[10px] text-blue-400 font-bold uppercase tracking-wider">Entendido: {aiAnalysis.refinedTranscript}</p>
-                          <div className="flex justify-between font-bold text-blue-900"><span>{formatCurrency(aiAnalysis.value)} • {aiAnalysis.distance}km</span> <span className="text-xs uppercase">{formatCurrency(aiAnalysis.value/aiAnalysis.distance)}/km</span></div>
-                          <div className={`text-xs font-bold p-2 rounded text-center ${(aiAnalysis.value/aiAnalysis.distance) >= 2.5 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                            {(aiAnalysis.value/aiAnalysis.distance) >= 2.5 ? '✅ RECOMENDADO: ALTA RENTABILIDADE' : '⚠️ BAIXA RENTABILIDADE'}
+                          <p className="text-[10px] text-blue-400 font-bold uppercase tracking-wider">Comando: {commandResult.refinedTranscript}</p>
+                          <div className="flex justify-between font-bold text-blue-900"><span>{formatCurrency(commandResult.value || 0)} • {commandResult.distance}km</span> <span className="text-xs uppercase">{formatCurrency((commandResult.value || 0)/(commandResult.distance || 1))}/km</span></div>
+                          <div className={`text-xs font-bold p-2 rounded text-center ${(commandResult.value || 0)/(commandResult.distance || 1) >= 2.5 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                            {(commandResult.value || 0/commandResult.distance || 1) >= 2.5 ? '✅ RECOMENDADO: ALTA RENTABILIDADE' : '⚠️ BAIXA RENTABILIDADE'}
                           </div>
                        </div>
                     )}
-                    {aiAnalysis.type === 'status' && (
+                    {commandResult.type === 'status' && (
                       <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="p-3 bg-green-50 text-green-700 rounded-xl text-xs font-bold text-center border border-green-100 uppercase">
-                        Comando: {aiAnalysis.refinedTranscript || (aiAnalysis.action === 'start' ? 'Iniciar' : 'Encerrar')}
+                        Comando: {commandResult.refinedTranscript || (commandResult.action === 'start' ? 'Iniciar' : 'Encerrar')}
                       </motion.div>
                     )}
-                    {aiAnalysis.type === 'query' && aiAnalysis.assistantResponse && (
+                    {commandResult.type === 'query' && commandResult.assistantResponse && (
                       <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="p-4 bg-orange-50 text-orange-700 rounded-2xl text-sm font-bold border border-orange-100 italic">
-                        {aiAnalysis.assistantResponse}
+                        {commandResult.assistantResponse}
                       </motion.div>
                     )}
                   </motion.div>
