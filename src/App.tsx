@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useGeolocation } from './hooks/useGeolocation';
 import { 
   Car as CarIcon, 
   Settings, 
@@ -249,39 +250,29 @@ export default function App() {
   const transcriptRef = useRef("");
   const [isAddingCar, setIsAddingCar] = useState(false);
 
-  // --- Effects ---
+  // --- Geolocation ---
+  const geo = useGeolocation(journey.active);
+
   useEffect(() => {
-    let watchId: number;
-    if (journey.active && navigator.geolocation) {
-      watchId = navigator.geolocation.watchPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          setJourney(prev => {
-            if (!prev.active) return prev;
-            let kmToAdd = 0;
-            if (prev.lastLat !== undefined && prev.lastLon !== undefined) {
-              kmToAdd = calculateDistance(prev.lastLat, prev.lastLon, latitude, longitude);
-            }
-            // Small threshold to avoid GPS "drift" distance
-            const DISTANCE_THRESHOLD = 0.05; // 50 meters
-            const finalKm = kmToAdd > DISTANCE_THRESHOLD ? prev.currentKm + kmToAdd : prev.currentKm;
-            
-            return {
-              ...prev,
-              currentKm: finalKm,
-              lastLat: latitude,
-              lastLon: longitude
-            };
-          });
-        },
-        (err) => console.error("Erro GPS:", err),
-        { enableHighAccuracy: true }
-      );
+    if (journey.active && geo.latitude !== null && geo.longitude !== null) {
+      setJourney(prev => {
+        if (!prev.active) return prev;
+        let kmToAdd = 0;
+        if (prev.lastLat !== undefined && prev.lastLon !== undefined && geo.latitude !== null && geo.longitude !== null) {
+          kmToAdd = calculateDistance(prev.lastLat, prev.lastLon, geo.latitude, geo.longitude);
+        }
+        const DISTANCE_THRESHOLD = 0.05; // 50 meters
+        const finalKm = kmToAdd > DISTANCE_THRESHOLD ? prev.currentKm + kmToAdd : prev.currentKm;
+
+        return {
+          ...prev,
+          currentKm: finalKm,
+          lastLat: geo.latitude,
+          lastLon: geo.longitude
+        };
+      });
     }
-    return () => {
-      if (watchId) navigator.geolocation.clearWatch(watchId);
-    };
-  }, [journey.active]);
+  }, [geo.latitude, geo.longitude, journey.active]);
 
   useEffect(() => localStorage.setItem('driver_profile', JSON.stringify(profile)), [profile]);
   useEffect(() => localStorage.setItem('custom_cars', JSON.stringify(customCars)), [customCars]);
@@ -701,7 +692,7 @@ export default function App() {
         <div className="flex items-center gap-3">
           {journey.active && <span className="w-2 h-2 bg-green-500 rounded-full animate-ping" />}
           <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${journey.active ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
-            {journey.active ? 'AO VIVO' : 'OFFLINE'}
+            {journey.active ? 'ATIVO' : 'INATIVO'}
           </span>
         </div>
       </header>
@@ -805,6 +796,25 @@ export default function App() {
                        </p>
                     </div>
                     <p className="text-[10px] text-gray-400 font-bold uppercase">Tempo Online: <span className="text-gray-900">{getTimeRemaining()}</span></p>
+                  </div>
+
+                  {journey.active && (
+                    <div className="grid grid-cols-2 gap-3 mt-4">
+                      <div className="p-3 bg-gray-50 rounded-xl border border-gray-100 text-center">
+                        <p className="text-[9px] font-bold text-gray-400 uppercase leading-none">Distância</p>
+                        <p className="text-lg font-black text-blue-600">
+                          {(journey.currentKm - journey.baseKm).toFixed(1)} <span className="text-xs font-normal">km</span>
+                        </p>
+                      </div>
+                      <div className="p-3 bg-gray-50 rounded-xl border border-gray-100 text-center">
+                        <p className="text-[9px] font-bold text-gray-400 uppercase leading-none">Velocidade</p>
+                        <p className={`text-lg font-black ${geo.currentSpeedKmh > 110 ? 'text-red-500' : 'text-green-600'}`}>{geo.currentSpeedKmh.toFixed(0)} <span className="text-xs font-normal">km/h</span></p>
+                        {geo.currentSpeedKmh > 110 && (
+                          <p className="text-[8px] font-bold text-red-500 uppercase leading-none mt-0.5">Atenção: Velocidade alta</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
                   </div>
                   <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden border border-gray-50">
                     <motion.div 
