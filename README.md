@@ -1,22 +1,22 @@
-# 🚗 Driver Finance Pro
+#  Driver Finance Pro
 
 Sistema profissional de controle financeiro para motoristas de aplicativo (Uber/99).
 
 ## Funcionalidades
 
-- 📊 **Dashboard em tempo real** - Acompanhe sua jornada, lucro e metas
-- 🎯 **Plano de ação** - Defina metas diárias, semanais, mensais ou ciclos
-- 🌤️ **Condições climáticas** - Impacto do clima na demanda
-- 📈 **Histórico completo** - Todas as jornadas registradas
-- ⚙️ **Configurações personalizáveis** - Veículos, custos fixos, perfil
+-  **Dashboard em tempo real** - Acompanhe sua jornada, lucro e metas
+-  **Plano de ação** - Defina metas diárias, semanais, mensais ou ciclos
+-  **Condições climáticas** - Impacto do clima na demanda
+-  **Histórico completo** - Todas as jornadas registradas
+-  **Configurações personalizáveis** - Veículos, custos fixos, perfil
 
 ## Tecnologias
 
 - React 19 + TypeScript
-- Vite (build tool)
-- TailwindCSS (estilização)
-- Geolocation API (rastreamento em tempo real)
-- OpenWeatherMap API (condições climáticas)
+- Vite 
+- TailwindCSS 
+- Geolocation API 
+- OpenWeatherMap API 
 
 ## Como executar
 
